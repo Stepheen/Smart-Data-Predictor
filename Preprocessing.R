@@ -97,7 +97,7 @@ car_4 <- readr::read_csv("used_cars_data//car4.csv")
         transmission = as.factor(transmission),
         no_own = as.factor(no_own)
       )
-  
+    write.csv(all_cars, "all_cars.csv", row.names = FALSE)
     
     
-
+    

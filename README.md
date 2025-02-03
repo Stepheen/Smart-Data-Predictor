@@ -1,3 +1,3 @@
 # Smart-Data-Predictor
 
-### AI Model to predict car prices based on the make and model, year manufactured, kilometer drive, fuel type, transmission and more.
+### An AI-powered model designed to predict car prices based on key factors such as make and model, year of manufacture, mileage, fuel type, transmission, and other relevant features.

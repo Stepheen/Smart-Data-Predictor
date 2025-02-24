@@ -1,0 +1,223 @@
+# Smart-Data-Predictor Exploratory Data Analysis
+
+**This Exploratory Data Analysis (EDA) is an essential step in the model-building process, focusing on identifying patterns in the data-set and examining the key factors that influence the price of a used car.**
+
+## **Objective**
+
+The goal of this EDA is to analyze trends and insights within the used car dataset to understand the factors affecting car prices. Through **data preprocessing, visualization, and statistical analysis**, we will explore relationships between key variables such as:
+
+-   **Year of manufacture**
+
+-   **Kilometers driven**
+
+-   **Fuel type**
+
+-   **Transmission type**
+
+-   **Ownership history**
+
+The insights from this analysis will guide **feature selection** and enhance the development of a **robust price prediction model**.
+
+## Libraries Used
+
+```{r}
+library(dplyr) # data manipulation
+library(ggplot2) # data visualization
+library(tidyr) # data tidying and reshaping
+library(scales) # scale balancing
+library(ggcorplot)
+```
+
+```{r}
+#VISUALIZATION SUPPORT
+
+```
+
+## Data Collection
+
+```{r}
+used_cars <- readr::read_csv("all_cars.csv") 
+```
+
+## Data Information
+
+### Data Size & Structure
+
+```{r}
+dim(all_cars)
+str(all_cars)
+
+```
+
+## Data Insights to generate
+
+These are the following insights we are generate
+
+1.  Distribution of numbers of car owners
+
+2.  Average selling price by car owners
+
+3.  Distribution of Fuel type
+
+4.  Average selling price by fuel type
+
+5.  Distribution of Price.
+
+6.  Relationship between kilometer driven and selling price
+
+```{r}
+lapply(colnames(all_cars), is.character)
+```
+
+```{r}
+# 1. Distribution of Car Owners
+# Group by ownership type and count occurrences
+owner_distribution <- all_cars %>%
+  group_by(no_own) %>%
+  summarise(owner_count = n())  %>%  arrange(desc(owner_count))
+
+# color
+colors <- colorRampPalette(c("#FFFF00", "#FF0000"))(nrow(owner_distribution))
+
+owner_distribution
+# Create a bar plot
+barplot(owner_distribution$owner_count, 
+        names.arg = owner_distribution$no_own, 
+        col = colors,
+        main = "Distribution of Number of Previous Owners",
+        xlab = "Number of Owners",
+        ylab = "Count")
+abline(h = mean(owner_distribution$owner_count), lty = 2, lwd = 2)
+
+
+```
+
+```{r}
+# 2. Average selling price by car owners 
+owner_price <- all_cars %>%
+  group_by(no_own) %>%
+  summarise(avg_price = mean(price)) %>%
+  arrange(desc(avg_price))
+
+# Define color gradient with valid hex codes
+colors_blyl <- colorRampPalette(c("#0000FF", "#ADD8E6"))(nrow(owner_price))
+
+# Plotting the barplot
+barplot(owner_price$avg_price, 
+        names.arg = owner_price$no_own, 
+        col = colors_blyl,
+        main = "Distribution of Price by Previous Owners",
+        xlab = "Number of Owners",
+        ylab = "Price",
+     ylim = c(0, max(owner_price$avg_price) * 1.1))  # Use avg_price for y-axis limit
+ 
+
+# Adding a horizontal line at the average price across all data
+abline(h = mean(owner_price$avg_price), lty = 2, lwd = 2)
+
+
+```
+
+```{r}
+
+# 3. Group by fuel type and count occurrences
+fuel_distribution <- all_cars %>%
+  group_by(fuel_type) %>%
+  summarise(fuel_count = n()) %>%
+  arrange(desc(fuel_count))
+
+# Define a color gradient
+colors <- colorRampPalette(c("#FF5733", "#FFC300", "#DAF7A6"))(nrow(fuel_distribution))
+
+# Create a bar plot with colors
+barplot(fuel_distribution$fuel_count, 
+        names.arg = fuel_distribution$fuel_type,
+        col = colors,  # Apply the color gradient
+        main = "Distribution of Fuel Type",
+        xlab = "Fuel Type",
+        ylab = "Count")
+
+
+
+
+```
+
+```{r}
+# 4. Average selling price by fuel type 
+fuel_price <- all_cars %>%
+  group_by(fuel_type) %>%
+  summarise(avg_price = round(mean(price), 0)) %>%
+  arrange(desc(avg_price))
+
+# Define color gradient
+colors_blyl <- colorRampPalette(c("#0000FF", "#ADD8E6"))(nrow(fuel_price))
+
+# Plotting the barplot
+barplot(fuel_price$avg_price, 
+        names.arg = fuel_price$fuel_type, 
+        col = colors_blyl,
+        main = "Average Selling Price by Fuel Type",
+        xlab = "Fuel Type",
+        ylab = "Average Price",
+        ylim = c(0, max(fuel_price$avg_price) * 1.4))  # Use avg_price for y-axis limit
+
+# Adding a horizontal line at the overall average price
+abline(h = mean(fuel_price$avg_price), lty = 2, lwd = 2)
+
+options(scipen = 999)
+  
+ggplot(fuel_price, aes(x = reorder(fuel_type, -avg_price), y = avg_price)) + 
+  geom_bar(stat = "identity", fill = "lightblue", color = "black") +
+  labs(title = "Average Selling Price by Fuel Type", 
+       x = "Fuel Type", 
+       y = "Average Price") +
+  theme_minimal()
+
+
+
+```
+
+## Price Distribution
+
+```{r}
+# Distribution of Price
+ggplot(all_cars, aes(x = price)) + 
+  geom_histogram(bins = 45, fill = "lightblue", color = "black") +
+  geom_vline(xintercept = mean(all_cars$price), 
+             linetype = "dashed", color = "red", lwd = 1) +
+    geom_vline(xintercept = median(all_cars$price), 
+             linetype = "dashed", color = "blue ", lty = 3, lwd = 1) +
+  labs(title = "Distribution of Car Prices", x = "Price", y = "Count") +
+  theme_minimal()
+
+```
+
+## Relationship Between Kilometer Driven and Price
+
+```{r}
+ggplot(all_cars, aes(x = Year_mfd, y = price, color = fuel_type)) +
+  geom_point(alpha = 1.5) +
+  labs(title = "Price Vs Year Manufactured",
+       x = "Year Manufactured",
+       y = "Price") +
+  theme_bw()
+```
+
+## Correlation Between Price and Kilometer Driven
+
+```{r}
+# Scatter plot to show the relationship between price and kilometers driven
+ggplot(all_cars, aes(x = km_drv, y = price)) + 
+  geom_point(alpha = 0.5, color = "blue") +  # Points with some transparency
+  labs(title = "Correlation Between Price and Kilometer Driven",
+       x = "Kilometers Driven",
+       y = "Price") +
+  theme_minimal()
+D365TDH
+```
+
+```{r}
+cor_matrix <- cor(all_cars[, c("Year_mfd", "km_drv", "price")]) #Select numerical cols
+
+ggcorplot(cor_matrix, method = "square", digits = 2, lab = TRUE)
+```

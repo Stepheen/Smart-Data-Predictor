@@ -69,8 +69,8 @@ car_4 <- readr::read_csv("used_cars_data//car4.csv")
           no_own == "First" ~ "First Owner",
           no_own == "Second" ~ "Second Owner",
           no_own == "Third" ~ "Third Owner",
-          no_own == "Fourth" ~ "Fourth & above Owner",
-          no_own == "4 or More" ~ "Fourth & above Owner",
+          no_own == "Fourth" ~ "Fourth & Above Owner",
+          no_own == "4 or More" ~ "Fourth & Above Owner",
           TRUE ~ as.character(no_own)
         )
       )
@@ -97,7 +97,7 @@ car_4 <- readr::read_csv("used_cars_data//car4.csv")
         transmission = as.factor(transmission),
         no_own = as.factor(no_own)
       )
-    write.csv(all_cars, "all_cars.csv", row.names = FALSE)
+write.csv(all_cars, "all_cars.csv", row.names = FALSE)
     
     
     
